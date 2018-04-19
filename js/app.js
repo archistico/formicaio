@@ -1,9 +1,10 @@
 let secondo = 0;
 
 function setup() {
-    createCanvas(505, 505);
+    var myCanvas = createCanvas(505, 505);
+    myCanvas.parent('myCanvas');
 
-    formicaio = new Formicaio(50, 50, 10);
+    formicaio = new Formicaio(50, 25, 10);
     formica1 = new Formica(formicaio);
     formica2 = new Formica(formicaio);
     formica3 = new Formica(formicaio);
@@ -15,7 +16,7 @@ function setup() {
     formica9 = new Formica(formicaio);
     formica10 = new Formica(formicaio);
 
-    mappa = new Mappa(100, 100);
+    mappa = new Mappa(100, 50);
 }
 
 function draw() {
@@ -24,7 +25,7 @@ function draw() {
         formica.vivi(mappa);
     });
 
-    mappa.disegna();
+    mappa.disegna(formicaio);
 
     secondo++;
 }
@@ -116,7 +117,7 @@ class Mappa {
         this.caselle = w * h;
         this.terreno = [];
 
-        for (let i = 0; i < h; i++) {
+        for (let i = 0; i < w; i++) {
             // per ogni riga
             this.terreno[i] = [];
         }
@@ -156,7 +157,7 @@ class Mappa {
         }
     }
 
-    disegna() {
+    disegna(formicaio) {
 
         for (let r = 0; r < this.height; r++) {
             for (let c = 0; c < this.width; c++) {
@@ -174,6 +175,11 @@ class Mappa {
                 rect(c * 5, r * 5, 5, 5);
             }
         }
+
+        formicaio.formiche.forEach(function(formica) {
+            fill(255, 0, 0);
+            rect(formica.x * 5, formica.y * 5, 5, 5);
+        });
 
         //rect(0, 0, this.width * 5, this.height * 5);
     }
