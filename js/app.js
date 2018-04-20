@@ -3,7 +3,39 @@ let secondo = 0;
 function setup() {
     var myCanvas = createCanvas(505, 505);
     myCanvas.parent('myCanvas');
+    mappa = new Mappa(100, 50);
 
+    initFormiche();
+}
+
+function draw() {
+    
+    // Se ci sono formiche nel formicaio
+    if(formicaio.formiche.length > 0) {
+        formicaio.formiche.forEach(function(formica) {
+            formica.vivi(mappa);
+        });
+        mappa.disegna(formicaio);
+    } else {
+        // Se non ci sono più verifica migliore genoma e crossalo con il secondo
+        formica1 = new Formica(formicaio);
+        formica2 = new Formica(formicaio);
+        formica3 = new Formica(formicaio);
+        formica4 = new Formica(formicaio);
+        formica5 = new Formica(formicaio);
+        formica6 = new Formica(formicaio);
+        formica7 = new Formica(formicaio);
+        formica8 = new Formica(formicaio);
+        formica9 = new Formica(formicaio);
+        formica10 = new Formica(formicaio);
+
+        formica1.setGenoma(formicaio.bestGenome[formicaio.bestGenome.length-1]);
+    }
+        
+    secondo++;
+}
+
+function initFormiche() {
     formicaio = new Formicaio(50, 25, 10);
     formica1 = new Formica(formicaio);
     formica2 = new Formica(formicaio);
@@ -15,19 +47,6 @@ function setup() {
     formica8 = new Formica(formicaio);
     formica9 = new Formica(formicaio);
     formica10 = new Formica(formicaio);
-    
-    mappa = new Mappa(100, 50);
-}
-
-function draw() {
-    //ellipse(50, 50, 80, 80);
-    formicaio.formiche.forEach(function(formica) {
-        formica.vivi(mappa);
-    });
-
-    mappa.disegna(formicaio);
-
-    secondo++;
 }
 
 function tira(min, max) {
@@ -40,6 +59,7 @@ class Formicaio {
         this.y = y;
         this.maxFormiche = maxFormiche;
         this.formiche = [];
+        this.bestGenome = [];
     }
 
     getCount() {
@@ -56,6 +76,7 @@ class Formicaio {
 
     removeFormica(formica) {
         let id = this.formiche.indexOf(formica);
+        this.bestGenome.push(this.formiche[id].getGenoma());
         if (id > -1) {
             this.formiche.splice(id, 1);
         }
@@ -73,7 +94,7 @@ class Formicaio {
         }
 
         console.log("Formica con id:" + formica.id + " rimossa dal formicaio perchè morta "+causa);
-        console.log("- Dati: "+formica.getDati());
+        console.log("- Dati: "+formica.getDati());        
     }
 }
 
@@ -113,6 +134,10 @@ class Formica {
         }
 
         this.position = 0;
+    }
+
+    setGenoma(genoma) {
+        this.genoma = genoma;
     }
 
     riduciSalute(value) {
