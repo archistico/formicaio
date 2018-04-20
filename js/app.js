@@ -18,6 +18,7 @@ function draw() {
         mappa.disegna(formicaio);
     } else {
         // Se non ci sono più verifica migliore genoma e crossalo con il secondo
+        console.log("----------------RE INIT FORMICAIO--------------");
         formica1 = new Formica(formicaio);
         formica2 = new Formica(formicaio);
         formica3 = new Formica(formicaio);
@@ -29,10 +30,14 @@ function draw() {
         formica9 = new Formica(formicaio);
         formica10 = new Formica(formicaio);
 
-        formica1.setGenoma(formicaio.bestGenome[formicaio.bestGenome.length-1]);
+        formica1.setGenoma(crossGenoma(formicaio.bestGenome[formicaio.bestGenome.length-1], formicaio.bestGenome[formicaio.bestGenome.length-2]));
     }
         
     secondo++;
+}
+
+function crossGenoma(primo, secondo) {
+    return primo.slice(0,24).concat(secondo.slice(25,49));
 }
 
 function initFormiche() {
@@ -92,6 +97,9 @@ class Formicaio {
         if(causa=='' && formica.fame == 0 && formica.sete != 0) {
             causa = 'di fame';
         }
+        if(causa=='' && formica.eta == formica.maxEta) {
+            causa = 'di vecchiaia';
+        }
 
         console.log("Formica con id:" + formica.id + " rimossa dal formicaio perchè morta "+causa);
         console.log("- Dati: "+formica.getDati());        
@@ -107,12 +115,13 @@ class Formica {
         this.salute = 100;
         this.fame = 100;
         this.sete = 100;
+        this.movimenti = 0;
         this.id = formicaio.getCount();
         this.formicaio.addFormica(this);
 
         // variabili generali formiche
         this.giorno = 1440;
-        this.maxEta = this.giorno * 365; // 3 giorni
+        this.maxEta = this.giorno * 365 * 3; // 3 anni
         this.tick = this.maxEta/365;
 
         // Genoma movimento
@@ -250,7 +259,6 @@ class Formica {
             checkSalute = true;
             this.riduciSalute(1);
         }
-        
 
         // Se sto bene, cioè non ho fame o sete, la salute risale
         if((this.sete>0) && (this.fame>0) && !checkSalute) {
@@ -260,6 +268,9 @@ class Formica {
 
         // Aumenta l'età
         this.eta += this.tick;
+
+        // Aggiungi movimento
+        this.movimenti += 1;
     }
 
     performance() {
@@ -267,7 +278,7 @@ class Formica {
     }
 
     getDati() {
-        return "ID:" + this.id + " | Età:"+ this.eta.toFixed(2) + " | Età max:"+ this.maxEta.toFixed(2) +" | Salute:" + this.salute + " | Fame:" + this.fame + " | Sete:" + this.sete+ " | Genoma:" + this.getGenomaStr();
+        return "ID:" + this.id + " | Movimenti:"+ this.movimenti + " | Età:"+ this.eta.toFixed(2) + " | Età max:"+ this.maxEta.toFixed(2) +" | Salute:" + this.salute + " | Fame:" + this.fame + " | Sete:" + this.sete+ " | Genoma:" + this.getGenomaStr();
     }
 }
 
