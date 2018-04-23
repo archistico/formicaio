@@ -1,4 +1,5 @@
 let secondo = 0;
+const LUNGHEZZAGENOMA = 500;
 
 function setup() {
     var myCanvas = createCanvas(505, 505);
@@ -9,10 +10,10 @@ function setup() {
 }
 
 function draw() {
-    
+
     // Se ci sono formiche nel formicaio
-    if(formicaio.formiche.length > 0) {
-        formicaio.formiche.forEach(function(formica) {
+    if (formicaio.formiche.length > 0) {
+        formicaio.formiche.forEach(function (formica) {
             formica.vivi(mappa);
         });
         mappa.disegna(formicaio);
@@ -30,14 +31,118 @@ function draw() {
         formica9 = new Formica(formicaio);
         formica10 = new Formica(formicaio);
 
-        formica1.setGenoma(crossGenoma(formicaio.bestGenome[formicaio.bestGenome.length-1], formicaio.bestGenome[formicaio.bestGenome.length-2]));
+        formica2.setGenoma(crossGenoma5(formicaio.bestGenome[formicaio.bestGenome.length - 1]));
+        formica1.setGenoma(crossGenoma5(formicaio.bestGenome[formicaio.bestGenome.length - 1]));
+        formica3.setGenoma(crossGenoma20(formicaio.bestGenome[formicaio.bestGenome.length - 1]));
+        formica4.setGenoma(crossGenoma20(formicaio.bestGenome[formicaio.bestGenome.length - 1]));
+        formica5.setGenoma(crossGenomaFinale(formicaio.bestGenome[formicaio.bestGenome.length - 1], formicaio.bestPerformance, 10));
+        formica6.setGenoma(crossGenomaFinale(formicaio.bestGenome[formicaio.bestGenome.length - 1], formicaio.bestPerformance, 20));
+        formica7.setGenoma(crossGenomaFinale(formicaio.bestGenome[formicaio.bestGenome.length - 1], formicaio.bestPerformance, 30));
+        formica8.setGenoma(crossGenomaFinale(formicaio.bestGenome[formicaio.bestGenome.length - 1], formicaio.bestPerformance, 40));
+        formica9.setGenoma(crossGenomaFinale(formicaio.bestGenome[formicaio.bestGenome.length - 1], formicaio.bestPerformance, 45));
+        formica10.setGenoma(crossGenomaFinale(formicaio.bestGenome[formicaio.bestGenome.length - 1], formicaio.bestPerformance, 50));
+
+        formicaio.bestGenome = [];
     }
-        
+
     secondo++;
 }
 
-function crossGenoma(primo, secondo) {
-    return primo.slice(0,24).concat(secondo.slice(25,49));
+function crossGenoma(primo) {
+    //return primo.slice(0, 24).concat(secondo.slice(25, 49));
+    let lunghezzaMetaPrimo = Math.floor(primo.length / 2);
+    let lunghezzaSecondo = primo.length - lunghezzaMetaPrimo;
+    return primo.slice(0, lunghezzaMetaPrimo).concat(randomGenoma(lunghezzaSecondo));
+}
+
+function crossGenoma5(genoma) {
+    // Ogni venti percento sostituiscilo con random
+    let risultato = [];
+    let venti = Math.floor(genoma.length / 20);
+    let contVenti = 0;
+
+    for (let i = 0; i < genoma.length; i++) {
+        contVenti++;
+        if (contVenti < venti) {
+            risultato.push(genoma[i]);
+        } else {
+            let mov = tira(1, 4);
+            switch (mov) {
+                case 1: risultato.push("A"); break;
+                case 2: risultato.push("I"); break;
+                case 3: risultato.push("D"); break;
+                case 4: risultato.push("S"); break;
+            }
+            if (contVenti > (2 * venti)) {
+                contVenti = 0;
+            }
+        }
+    }
+    return risultato;
+}
+
+function crossGenoma20(genoma) {
+    // Ogni venti percento sostituiscilo con random
+    let risultato = [];
+    let venti = Math.floor(genoma.length / 5);
+    let contVenti = 0;
+
+    for (let i = 0; i < genoma.length; i++) {
+        contVenti++;
+        if (contVenti < venti) {
+            risultato.push(genoma[i]);
+        } else {
+            let mov = tira(1, 4);
+            switch (mov) {
+                case 1: risultato.push("A"); break;
+                case 2: risultato.push("I"); break;
+                case 3: risultato.push("D"); break;
+                case 4: risultato.push("S"); break;
+            }
+            if (contVenti > (2 * venti)) {
+                contVenti = 0;
+            }
+        }
+    }
+    return risultato;
+}
+
+function crossGenomaFinale(genoma, performance, random) {
+    // Ogni venti percento sostituiscilo con random
+    let risultato = [];
+    let inizioRandom = performance - random;
+
+    for (let i = 0; i < genoma.length; i++) {
+        if (i < inizioRandom) {
+            risultato.push(genoma[i]);
+        } else {
+            let mov = tira(1, 4);
+            switch (mov) {
+                case 1: risultato.push("A"); break;
+                case 2: risultato.push("I"); break;
+                case 3: risultato.push("D"); break;
+                case 4: risultato.push("S"); break;
+            }
+        }
+    }
+    return risultato;
+}
+
+function randomGenoma(quantita) {
+    let genoma = [];
+
+    // Randomizza genoma
+    for (let i = 0; i < quantita; i++) {
+        let mov = tira(1, 4);
+        switch (mov) {
+            case 1: genoma.push("A"); break;
+            case 2: genoma.push("I"); break;
+            case 3: genoma.push("D"); break;
+            case 4: genoma.push("S"); break;
+        }
+    }
+
+    return genoma;
 }
 
 function initFormiche() {
@@ -65,6 +170,7 @@ class Formicaio {
         this.maxFormiche = maxFormiche;
         this.formiche = [];
         this.bestGenome = [];
+        this.bestPerformance = 0;
     }
 
     getCount() {
@@ -82,27 +188,32 @@ class Formicaio {
     removeFormica(formica) {
         let id = this.formiche.indexOf(formica);
         this.bestGenome.push(this.formiche[id].getGenoma());
+        //setta la migliore performance
+        if(this.bestPerformance<this.formiche[id].movimenti) {
+            this.bestPerformance = this.formiche[id].movimenti;
+        }
+        // Cancella la formica
         if (id > -1) {
             this.formiche.splice(id, 1);
         }
 
         // Causa della morte: di fame, di sete, di fame e di sete
         let causa = '';
-        if(causa=='' && formica.fame == 0 && formica.sete == 0) {
+        if (causa == '' && formica.fame == 0 && formica.sete == 0) {
             causa = 'di fame e di sete';
         }
-        if(causa=='' && formica.fame != 0 && formica.sete == 0) {
+        if (causa == '' && formica.fame != 0 && formica.sete == 0) {
             causa = 'di sete';
         }
-        if(causa=='' && formica.fame == 0 && formica.sete != 0) {
+        if (causa == '' && formica.fame == 0 && formica.sete != 0) {
             causa = 'di fame';
         }
-        if(causa=='' && formica.eta == formica.maxEta) {
+        if (causa == '' && formica.eta == formica.maxEta) {
             causa = 'di vecchiaia';
         }
 
-        console.log("Formica con id:" + formica.id + " rimossa dal formicaio perchè morta "+causa);
-        console.log("- Dati: "+formica.getDati());        
+        console.log("Performance: " + formica.movimenti + " | Formica con id:" + formica.id + " rimossa dal formicaio perchè morta " + causa);
+        //console.log("- Dati: " + formica.getDati());
     }
 }
 
@@ -121,8 +232,8 @@ class Formica {
 
         // variabili generali formiche
         this.giorno = 1440;
-        this.maxEta = this.giorno * 365 * 3; // 3 anni
-        this.tick = this.maxEta/365;
+        this.maxEta = this.giorno * 365 * 10; // 3 anni
+        this.tick = this.maxEta / 1000;
 
         // Genoma movimento
         // A avanti
@@ -132,9 +243,9 @@ class Formica {
         this.genoma = [];
 
         // Randomizza genoma
-        for(let i=0; i<50; i++) {
+        for (let i = 0; i < LUNGHEZZAGENOMA; i++) {
             let mov = tira(1, 4);
-            switch(mov) {
+            switch (mov) {
                 case 1: this.genoma.push("A"); break;
                 case 2: this.genoma.push("I"); break;
                 case 3: this.genoma.push("D"); break;
@@ -150,27 +261,27 @@ class Formica {
     }
 
     riduciSalute(value) {
-        
+
         this.salute -= value;
 
         // controlla limiti
-        if(this.salute > 100) {
+        if (this.salute > 100) {
             this.salute = 100;
         }
-        if(this.salute < 0) {
+        if (this.salute < 0) {
             this.salute = 0;
         }
     }
 
     aumentaSalute(value) {
-        
+
         this.salute += value;
 
         // controlla limiti
-        if(this.salute > 100) {
+        if (this.salute > 100) {
             this.salute = 100;
         }
-        if(this.salute < 0) {
+        if (this.salute < 0) {
             this.salute = 0;
         }
     }
@@ -189,28 +300,28 @@ class Formica {
         }
 
         // Muoviti
-        if(this.position > (this.genoma.length-1)) {
+        if (this.position > (this.genoma.length - 1)) {
             this.position = 0;
         }
-        switch(this.genoma[this.position]) {
-            case "A": this.y+=1; break;
-            case "I": this.y-=1; break;
-            case "D": this.x+=1; break;
-            case "S": this.x-=1; break;
+        switch (this.genoma[this.position]) {
+            case "A": this.y += 1; break;
+            case "I": this.y -= 1; break;
+            case "D": this.x += 1; break;
+            case "S": this.x -= 1; break;
         }
         this.position++;
 
-        if(this.x >= mappa.width-1) {
-            this.x = mappa.width-1;
+        if (this.x >= mappa.width - 1) {
+            this.x = mappa.width - 1;
         }
-        if(this.y >= mappa.height-1) {
-            this.y = mappa.height-1;
+        if (this.y >= mappa.height - 1) {
+            this.y = mappa.height - 1;
         }
 
-        if(this.x <= 0) {
+        if (this.x <= 0) {
             this.x = 0;
         }
-        if(this.y <= 0) {
+        if (this.y <= 0) {
             this.y = 0;
         }
 
@@ -220,9 +331,9 @@ class Formica {
         let checkCibo = mappa.checkCibo(this.x, this.y);
         if (checkAcqua) {
             this.sete = 100;
-            console.log("Formica ID: " + this.id + " ha bevuto");            
+            //console.log("Formica ID: " + this.id + " ha bevuto");            
         } else {
-            if(this.sete>0) {
+            if (this.sete > 0) {
                 this.sete -= 1;
             } else {
                 this.sete = 0;
@@ -230,38 +341,38 @@ class Formica {
         }
         if (checkCibo) {
             this.fame = 100;
-            console.log("Formica ID: " + this.id + " ha mangiato");
+            //console.log("Formica ID: " + this.id + " ha mangiato");
         } else {
-            if(this.fame>0) {
+            if (this.fame > 0) {
                 this.fame -= 1;
             } else {
                 this.fame = 0;
             }
         }
-         
+
         // ATTENZIONE CHE VENGONO PRESE TUTTE ASSIEME
         let checkSalute = false;
 
         // Se ho sia fame che sete la salute scende ancora più rapidamente
-        if((this.sete<=0) && (this.fame<=0) && !checkSalute) {
+        if ((this.sete <= 0) && (this.fame <= 0) && !checkSalute) {
             checkSalute = true;
             this.riduciSalute(10);
         }
 
         // La sete fa scendere la salute più velocemente
-        if((this.sete<=0) && !checkSalute) {
+        if ((this.sete <= 0) && !checkSalute) {
             checkSalute = true;
             this.riduciSalute(3);
         }
 
         // Controlla fame e sete per capire la salute
-        if((this.fame<=0) && !checkSalute) {
+        if ((this.fame <= 0) && !checkSalute) {
             checkSalute = true;
             this.riduciSalute(1);
         }
 
         // Se sto bene, cioè non ho fame o sete, la salute risale
-        if((this.sete>0) && (this.fame>0) && !checkSalute) {
+        if ((this.sete > 0) && (this.fame > 0) && !checkSalute) {
             checkSalute = true;
             this.aumentaSalute(1);
         }
@@ -278,7 +389,7 @@ class Formica {
     }
 
     getDati() {
-        return "ID:" + this.id + " | Movimenti:"+ this.movimenti + " | Età:"+ this.eta.toFixed(2) + " | Età max:"+ this.maxEta.toFixed(2) +" | Salute:" + this.salute + " | Fame:" + this.fame + " | Sete:" + this.sete+ " | Genoma:" + this.getGenomaStr();
+        return "ID:" + this.id + " | Movimenti:" + this.movimenti + " | Età:" + this.eta.toFixed(2) + " | Età max:" + this.maxEta.toFixed(2) + " | Salute:" + this.salute + " | Fame:" + this.fame + " | Sete:" + this.sete + " | Genoma:" + this.getGenomaStr();
     }
 }
 
@@ -349,7 +460,7 @@ class Mappa {
             }
         }
 
-        formicaio.formiche.forEach(function(formica) {
+        formicaio.formiche.forEach(function (formica) {
             fill(255, 0, 0);
             rect(formica.x * 5, formica.y * 5, 5, 5);
         });
